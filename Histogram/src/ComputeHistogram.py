@@ -25,6 +25,8 @@ def listAllTables(conn):
     print(cursor.fetchall())
 
     computeHistogramAllAgesWithUnivDeg(cursor)
+    computeHistogramAllAgesWithUnivDegWithY(cursor)
+    computeHistogramAllAgesWithUnivDegWithN(cursor)
     
         
         
@@ -42,9 +44,7 @@ def computeHistogramAllAgesWithUnivDeg(cursor):
     plt.legend()
     #plt.show()
     plt.savefig('1.png')
-    plt.clf()
-    computeHistogramAllAgesWithUnivDegWithY(cursor)
-    
+    plt.clf()    
     
     
 #Method to compute & plot histogram for all ages with university degree with label y='yes' holder from dataset        
@@ -62,7 +62,6 @@ def computeHistogramAllAgesWithUnivDegWithY(cursor):
     #plt.show()
     plt.savefig('2.png')
     plt.clf()
-    computeHistogramAllAgesWithUnivDegWithN(cursor)
 
 
 #Method to compute & plot histogram for all ages with university degree with label n='no' holder from dataset        
