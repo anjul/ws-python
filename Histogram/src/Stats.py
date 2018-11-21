@@ -2,10 +2,9 @@ import sqlite3
 from sqlite3 import Error
 
 import numpy as np
-from decimal import Decimal
-from PyObjCTools.Conversion import decimal
 
-var_sqlitedbFilePath = "/Users/anjul/eclipse/workspace/ws-python/Histogram/db/db_BankAdditional.db"
+
+var_sqlitedbFilePath = "db_BankAdditional.db"
 
 # Defining database connection and supplying local sqlite db file path
 def createConnection(var_dbFilePath):
@@ -17,16 +16,6 @@ def createConnection(var_dbFilePath):
         print(err)
     finally:
         conn.close()
-
-
-""""
-select tbl_bankadditional.job as Job,( select round( (select count(marital) from tbl_bankadditional where marital='"+marital+"' and job='"+job+"') / (count(job)*0.01),2) from tbl_bankadditional where job='"+job+"') as Married,"+
-                    "(select round((select count(marital) from tbl_bankadditional where marital='"+single+"' and job='"+admin+"') / (count(job)*0.01),2) from tbl_bankadditional where job like "%admin.%") as Single,"+
-                    "(select round((select count(marital) from tbl_bankadditional where marital='"+divorced+"' and job='"+admin+"') / (count(job)*0.01),2) from tbl_bankadditional where job like "%admin.%") as Divorced,"+
-                    "(select round((select count(marital) from tbl_bankadditional where marital='"+unknown+"' and job='"+admin+"') / (count(job)*0.01),2) from tbl_bankadditional where job like "%admin.%") as Unknown"+
-                    "from tbl_bankadditional where job='"job+"' group by job;"
-"""
-
 
 def calculateStats(conn):
     cursor = conn.cursor()
@@ -42,36 +31,51 @@ def calculateStats(conn):
     #print(arr_distinctmarital[0])
     
     
-    query = "create temp table tblStats(Job text,Married text, Single text, Divorced text);"
+    query = "create table If not exists tblStats(Job text,Married text, Single text, Divorced text, Unknown text);"
     cursor.execute(query)
     
     
     for job in arr_distinctJob:
         
         list_jobandmaritalpercentage = []
-        
+        list_recordset = [job[0],]
+                
         for marital in arr_distinctmarital:
-            #query = "select tbl_bankadditional.job as Job,(select round( (select count(marital) from tbl_bankadditional where marital='"+marital+"' and job='"+job+"') / (count(job)*0.01),2) from tbl_bankadditional where job='"+job+"') as'"+marital+"' from tbl_bankadditional where job='"+job+"' group by job;"
-            query = "select count(marital) from tbl_bankadditional where marital='"+marital+"' and job='"+job+"';"
+            query = "select count(marital) from tbl_bankadditional where marital='"+marital[0]+"' and job='"+job[0]+"';"
             cursor.execute(query)
-            val_maritalandjob = cursor.fetchall()
+            val_maritalandjob =cursor.fetchall()
+            #print(val_maritalandjob[0][0])
             
-            query = "select count(job) from tbl_bankadditional where job='"+job+"';"
+            query = "select count(job) from tbl_bankadditional where job='"+job[0]+"';"
             cursor.execute(query)
             val_jobcount = cursor.fetchall()
+            #print(val_jobcount[0][0])          
             
-            val_percentage = (val_maritalandjob / val_jobcount)*100
+            val_percentage = ( val_maritalandjob[0][0] / val_jobcount[0][0]) * 100
             val_percentage = round(val_percentage,2)
+            #print(val_percentage)
             
-            list_jobandmaritalpercentage.insert(val_percentage)
             
-            #cursor.execute(query)
-            #print(cursor.fetchall())
+            list_recordset.append(str(val_percentage)+" %")
+            #print(list_recordset)
+            
+   
+        tuple_recordset = tuple(list_recordset)
+        #print(tuple_recordset)
         
+        list_jobandmaritalpercentage.append(tuple_recordset)
         
-    
-    #cursor.execute("select name from sqlite_master where type='table';")
-    #print(cursor.fetchall())
+        #print(list_jobandmaritalpercentage)
+        
+        query = "insert into tblStats(Job, Married , Single , Divorced , Unknown) values (?,?,?,?,?)"
+        cursor.executemany(query, list_jobandmaritalpercentage)
+        #cursor.execute("COMMIT")    
+        
+        query = "select * from tblStats;"
+        cursor.execute(query)
+        
+        #print(cursor.fetchall())
+
 
 
 if __name__ == "__main__":
