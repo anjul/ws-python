@@ -1,8 +1,6 @@
 import sqlite3
 from sqlite3 import Error
 
-import numpy as np
-
 
 var_sqlitedbFilePath = "db_BankAdditional.db"
 
@@ -22,25 +20,21 @@ def calculateStats(conn):
     
     query = "select distinct(job) from tbl_bankadditional;"
     cursor.execute(query)
-    arr_distinctJob = np.asarray_chkfinite(cursor.fetchall())
-    #print(arr_distinctJob)
+    list_distinctJob = list(cursor.fetchall())
+    #print(list_distinctJob)
     
     query = "select distinct(marital) from tbl_bankadditional;"
     cursor.execute(query)
-    arr_distinctmarital = np.asarray_chkfinite(cursor.fetchall())
-    #print(arr_distinctmarital[0])
-    
-    
-    query = "create table If not exists tblStats(Job text,Married text, Single text, Divorced text, Unknown text);"
-    cursor.execute(query)
-    
-    
-    for job in arr_distinctJob:
+    list_distinctmarital = list(cursor.fetchall())
+    #print(list_distinctmarital)
+      
+    #resultList = []
+    print(['Job']+list_distinctmarital)
+    for job in list_distinctJob:
         
-        list_jobandmaritalpercentage = []
         list_recordset = [job[0],]
                 
-        for marital in arr_distinctmarital:
+        for marital in list_distinctmarital:
             query = "select count(marital) from tbl_bankadditional where marital='"+marital[0]+"' and job='"+job[0]+"';"
             cursor.execute(query)
             val_maritalandjob =cursor.fetchall()
@@ -60,21 +54,10 @@ def calculateStats(conn):
             #print(list_recordset)
             
    
-        tuple_recordset = tuple(list_recordset)
-        #print(tuple_recordset)
+        print(list_recordset)
+        #resultList.append(list_recordset)
         
-        list_jobandmaritalpercentage.append(tuple_recordset)
-        
-        #print(list_jobandmaritalpercentage)
-        
-        query = "insert into tblStats(Job, Married , Single , Divorced , Unknown) values (?,?,?,?,?)"
-        cursor.executemany(query, list_jobandmaritalpercentage)
-        #cursor.execute("COMMIT")    
-        
-        query = "select * from tblStats;"
-        cursor.execute(query)
-        
-        #print(cursor.fetchall())
+    #print(resultList)
 
 
 
