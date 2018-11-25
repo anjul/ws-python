@@ -2,12 +2,13 @@ import sqlite3
 from sqlite3 import Error
 
 
-var_sqlitedbFilePath = "db_BankAdditional.db"
+var_sqlitedbFilePath = "/Users/anjul/eclipse/workspace/ws-python/Histogram/db/db_BankAdditional.db"
 
 # Defining database connection and supplying local sqlite db file path
 def createConnection(var_dbFilePath):
     try:
         conn = sqlite3.connect(var_dbFilePath)
+        conn.text_factory = str # Required so that every string which will be returned from database should be in UTF-8 instead unicode
         print(sqlite3.version)  
         calculateStats(conn)
     except Error as err:
@@ -45,10 +46,9 @@ def calculateStats(conn):
             val_jobcount = cursor.fetchall()
             #print(val_jobcount[0][0])          
             
-            val_percentage = ( val_maritalandjob[0][0] / val_jobcount[0][0]) * 100
+            val_percentage = ( float(val_maritalandjob[0][0]) / float(val_jobcount[0][0])) * 100
             val_percentage = round(val_percentage,2)
             #print(val_percentage)
-            
             
             list_recordset.append(str(val_percentage)+" %")
             #print(list_recordset)
